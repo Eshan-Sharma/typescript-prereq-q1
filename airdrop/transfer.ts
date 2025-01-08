@@ -13,17 +13,33 @@ const toWallet = new PublicKey("gyQyxHt1XNvaUJcySyhtv9bRd522HsrXdiyYjeZnAYW");
 const connection = new Connection("https://api.devnet.solana.com");
 (async () => {
   try {
+    const balance = await connection.getBalance(fromWallet.publicKey);
     const transaction = new Transaction().add(
       SystemProgram.transfer({
         fromPubkey: fromWallet.publicKey,
         toPubkey: toWallet,
-        lamports: (2 - 0.01001) * LAMPORTS_PER_SOL,
+        lamports: balance,
       })
     );
     transaction.recentBlockhash = (
       await connection.getLatestBlockhash("confirmed")
     ).blockhash;
     transaction.feePayer = fromWallet.publicKey;
+    const fee =
+      (
+        await connection.getFeeForMessage(
+          transaction.compileMessage(),
+          "confirmed"
+        )
+      ).value || 0;
+    transaction.instructions.pop();
+    transaction.add(
+      SystemProgram.transfer({
+        fromPubkey: fromWallet.publicKey,
+        toPubkey: toWallet,
+        lamports: balance - fee,
+      })
+    );
     const signature = await sendAndConfirmTransaction(connection, transaction, [
       fromWallet,
     ]);
