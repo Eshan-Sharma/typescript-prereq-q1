@@ -7,7 +7,7 @@
     "keygen": "ts-node ./keygen.ts",
     "airdrop": "ts-node ./airdrop.ts",
     "enroll": "ts-node ./enroll.ts",
-    "transfer": "ts-node ./enroll.ts",
+    "transfer": "ts-node ./transfer.ts",
     "test": "jest"
   },
   "dependencies": {
